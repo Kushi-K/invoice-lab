@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Invoice Lab · Document workspace</title>
+  <link rel="stylesheet" href="/ui/style.css"><script src="/ui/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#/new"><span class="brand-icon">IL</span><span>Invoice Lab<small>Document workspace</small></span></a>
+      <div class="nav-label">WORKSPACE</div>
+      <nav aria-label="Workspace navigation">
+        <a id="nav-new" href="#/new"><span class="nav-icon">＋</span>New analysis</a>
+        <a id="nav-results" href="#/results"><span class="nav-icon">▤</span>Saved results<span id="history-count" class="nav-count"></span></a>
+      </nav>
+      <div class="sidebar-bottom"><span class="local-dot"></span> Local workspace<small>Documents stay on this computer.</small></div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar"><div id="breadcrumb">Workspace / New analysis</div><div class="connection-label"><span id="connection-dot" class="connection-dot"></span><span id="connection-label">Checking Ollama…</span></div></header>
+      <main>
+        <div id="notification" class="notice" role="status" aria-live="polite" hidden></div>
+        <section id="view-new" class="view">
+          <div class="page-heading"><div><span class="eyebrow">DOCUMENT INTAKE</span><h1>New analysis</h1><p>Upload a document, inspect its structure, then review the extracted values.</p></div></div>
+          <div class="upload-layout">
+            <form id="extract-form" class="panel upload-panel">
+              <div class="panel-title"><h2>Source document</h2><span class="subtle">PDF or image · up to 25 MB</span></div>
+              <input id="document" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.tif,.tiff" hidden>
+              <div id="dropzone" class="dropzone" role="button" tabindex="0" aria-label="Choose a PDF or image"><span class="upload-glyph">↑</span><strong>Drop your document here</strong><span>or <u>choose a file</u></span><small>PDF, PNG, JPG, WebP and TIFF</small></div>
+              <div id="file-selected" class="selected-file" hidden></div>
+              <div class="upload-settings"><label class="checkbox-label"><input id="force-ocr" type="checkbox"><span>Force OCR<small>Use Tesseract even when a PDF contains selectable text.</small></span></label><label class="checkbox-label auto-ai"><input id="auto-ai" type="checkbox" checked><span>Run local AI analysis after OCR<small>Extract fields, explain document meaning, and verify values with the selected Ollama model.</small></span></label><details><summary>Optional evaluation</summary><label class="input-label" for="truth">Verified ground-truth JSON</label><input id="truth" type="file" accept=".json"><p class="subtle">Compare extracted values with independently checked values.</p></details></div>
+              <div class="panel-footer"><span class="subtle">OCR and local AI analysis are separate, visible stages.</span><button id="run-button" class="button primary" type="submit">Analyze document →</button></div>
+              <div id="upload-progress" class="upload-progress" hidden><span class="spinner"></span><div><strong>Reading and structuring your document</strong><p>Scanned pages may take a few minutes. This step does not call the LLM.</p></div></div>
+            </form>
+            <aside class="intake-guide"><h2>A reviewable workflow</h2><ol class="workflow-list"><li><b>Read the source</b><p>Embedded PDF text first, with OCR when needed.</p></li><li><b>Inspect the LLM input</b><p>See structured evidence and the exact request before sending it.</p></li><li><b>Extract and review</b><p>Run your local model and compare its reasons with evidence scores.</p></li><li><b>Make corrections</b><p>Edit values directly and save changes together. Originals are retained.</p></li></ol><div id="intake-model-status" class="runtime-note"></div></aside>
+          </div>
+        </section>
+        <section id="view-results" class="view" hidden>
+          <div class="page-heading"><div><span class="eyebrow">YOUR WORKSPACE</span><h1>Saved results</h1><p>Find a document and continue its review without running OCR again.</p></div><a href="#/new" class="button primary">＋ New analysis</a></div>
+          <div class="panel"><div class="table-toolbar"><label class="search-field"><span>⌕</span><input id="history-search" type="search" placeholder="Search documents…" aria-label="Search saved documents"></label><select id="history-filter" aria-label="Filter saved results"><option value="all">All review states</option><option value="unreviewed">Not reviewed</option><option value="in_progress">In progress</option><option value="reviewed">Reviewed</option></select><button id="refresh-history" class="button secondary">Refresh</button></div><div id="history-table" class="table-container"></div><div class="pagination"><span id="history-summary" class="subtle"></span><div><button id="history-prev" class="button secondary">← Previous</button><span id="history-page"></span><button id="history-next" class="button secondary">Next →</button></div></div></div>
+        </section>
+        <section id="view-analysis" class="view" hidden>
+          <a class="back-link" href="#/results">← Saved results</a>
+          <div class="page-heading analysis-heading"><div><span class="eyebrow">DOCUMENT ANALYSIS</span><h1 id="analysis-name">Loading analysis…</h1><div id="analysis-meta" class="metadata"></div></div><div class="heading-actions"><button id="run-ai" class="button primary">Run AI analysis</button><button id="reload-analysis" class="button secondary">Reload</button><button id="toggle-source" class="button secondary">Show source</button><details class="export-menu"><summary class="button secondary">Export ↓</summary><div><button id="download-current">Current report JSON</button><button id="download-original">Original extraction JSON</button></div></details></div></div>
+          <div id="ai-progress" class="ai-progress" role="status" aria-live="polite" hidden></div><div id="analysis-summary" class="summary-strip"></div>
+          <nav id="analysis-tabs" class="analysis-tabs" aria-label="Analysis sections"></nav>
+          <div id="analysis-layout" class="analysis-layout"><div id="analysis-content"></div><aside id="source-panel" class="panel source-panel" hidden><div class="panel-title"><h2>Source evidence</h2><button id="close-source" class="icon-button" aria-label="Close source preview">×</button></div><div class="source-toolbar"><button id="prev-page" class="icon-button" aria-label="Previous source page">←</button><select id="source-page" aria-label="Source page"></select><button id="next-page" class="icon-button" aria-label="Next source page">→</button></div><div class="preview-stage"><div class="preview-wrap"><img id="page-image" alt="Document source"><div id="highlight" class="highlight" hidden></div></div></div><div id="source-details" class="source-details"><p>Select a field’s source button to inspect its evidence.</p></div></aside></div>
+          <div id="save-bar" class="save-bar" hidden><div><strong id="save-status">Click a value to edit</strong><small id="save-help" class="save-help"></small><label class="checkbox-label compact"><input id="confirm-values" type="checkbox"><span id="confirm-label">Confirm all populated fields</span></label></div><div class="save-actions"><input id="review-note" type="text" placeholder="Review note (optional)" aria-label="Review note" maxlength="500"><button id="discard-changes" class="button secondary">Discard</button><button id="save-changes" class="button primary">Save changes</button></div></div>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
